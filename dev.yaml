@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  dev:
+    image: dev
+    container_name: dev
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./ws:/home/niels/dev_ws/
+    user: "niels:niels"
+    stdin_open: true
+    tty: true
