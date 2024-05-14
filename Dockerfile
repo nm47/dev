@@ -3,46 +3,38 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 arg USERNAME=niels
 
-# Neovim deps
-RUN apt-get update && apt-get install -y \
+# Deps
+RUN apt update && apt install -y \
+    sudo \
     python3-pip \
     python3-setuptools \
     xclip \
-    ninja-build \
-    gettext \
-    libtool \
-    libtool-bin \
-    autoconf \
-    automake \
     cmake \
-    g++ \
-    pkg-config \
+    build-essential \
     unzip \
     curl \
-    git \
-    doxygen && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    pip3 install pynvim
+    ripgrep \
+    git && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    #pip3 install pynvim
 
 # Clone and build Neovim
-RUN git clone https://github.com/neovim/neovim.git /neovim && \
-    cd /neovim && \
-    make CMAKE_BUILD_TYPE=Release && \
-    make install
+RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
+    sudo rm -rf /opt/nvim && \
+    sudo tar -C /opt -xzf nvim-linux64.tar.gz
 
 # Set Neovim as the default editor
-RUN update-alternatives --install /usr/bin/editor editor /usr/local/bin/nvim 60
+RUN update-alternatives --install /usr/bin/editor editor /opt/nvim-linux64/bin/nvim 60
 
 # install dev env tools
-RUN apt-get update && apt-get install -y \
-    sudo \
+RUN apt update && apt install -y \
     xclip \
     clangd \
     tree \
     clang-format \
     wget && \
-    apt-get clean && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create dev user
@@ -59,11 +51,12 @@ RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
 
 RUN echo "set -o vi" >> /home/$USERNAME/.bashrc && \
     echo "alias vim='nvim'" >> /home/$USERNAME/.bashrc && \
-    echo "source ~/.fzf.bash" >> /home/$USERNAME/.bashrc
+    echo "source ~/.fzf.bash" >> /home/$USERNAME/.bashrc && \
+    echo "export PATH=\"$PATH:/opt/nvim-linux64/bin\"" >> /home/$USERNAME/.bashrc
 
 RUN git clone https://github.com/nm47/dotfiles.git ~/.config/ && \
-    nvim --headless "+Lazy! sync" +qa && \
-    nvim --headless "+MasonUpdate" +qa && \
+    /opt/nvim-linux64/bin/nvim --headless "+Lazy! sync" +qa && \
+    /opt/nvim-linux64/bin/nvim --headless "+MasonUpdate" +qa && \
     mkdir dev_ws
 
 WORKDIR /home/$USERNAME/dev_ws/
