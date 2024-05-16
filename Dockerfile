@@ -1,10 +1,8 @@
 FROM ubuntu:22.04
 
+ARG USERNAME
 # Avoiding interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Argument for creating a non-root user
-ARG USERNAME=niels
 
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \

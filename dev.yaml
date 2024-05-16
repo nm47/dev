@@ -2,13 +2,25 @@ version: '3.8'
 
 services:
   dev:
-    image: dev
+    build:
+      context: .
+      args:
+        - USERNAME=niels
     container_name: dev
     environment:
       - DISPLAY=$DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./ws:/home/niels/dev_ws/
-    user: "niels:niels"
+      - dev_ws:/home/${USERNAME}/dev_ws/
+    user: "${USERNAME}:${USERNAME}"
     stdin_open: true
     tty: true
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  dev_ws:
