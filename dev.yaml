@@ -11,7 +11,7 @@ services:
       - DISPLAY=$DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - dev_ws:/home/${USERNAME}/dev_ws/
+      - ./ws:/home/${USERNAME}/dev_ws/
     user: "${USERNAME}:${USERNAME}"
     stdin_open: true
     tty: true
@@ -21,6 +21,3 @@ services:
 networks:
   dev-network:
     driver: bridge
-
-volumes:
-  dev_ws:
