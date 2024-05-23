@@ -13,6 +13,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./ws:/home/${USERNAME}/dev_ws/
     user: "${USERNAME}:${USERNAME}"
+    entrypoint: /bin/bash
     stdin_open: true
     tty: true
     networks:
