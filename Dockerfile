@@ -4,6 +4,7 @@ ARG USERNAME
 # Avoiding interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+USER root
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
     sudo \
@@ -41,7 +42,6 @@ RUN useradd -m -s /bin/bash $USERNAME && \
 
 # Switch to the created user
 USER $USERNAME
-WORKDIR /home/$USERNAME/
 
 # Install fzf
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
@@ -63,9 +63,4 @@ RUN git clone https://github.com/nm47/dotfiles.git ~/.config && \
     nvim --headless "+MasonUpdate" +qa && \
     nvim --headless "+TSUpdateSync" +qa
 
-# Create development workspace directory
-RUN mkdir -p ~/dev_ws
-
-WORKDIR /home/$USERNAME/dev_ws/
 CMD ["bash"]
-
