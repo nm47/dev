@@ -1,11 +1,9 @@
-FROM ubuntu:22.04
+FROM cfs_base
 
-ARG USERNAME
-# Avoiding interactive prompts during package installation
+# Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-USER root
-# Update package list and install dependencies
+# Install necessary packages
 RUN apt-get update && apt-get install -y \
     sudo \
     python3-pip \
@@ -26,29 +24,28 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Clone and install Neovim
-RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
+# Install Neovim and fzf
+RUN \
+    # Install Neovim
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
     tar -C /opt -xzf nvim-linux64.tar.gz && \
     rm nvim-linux64.tar.gz && \
-    ln -s /opt/nvim-linux64/bin/nvim /usr/bin/nvim
-
-# Set Neovim as the default editor
-RUN update-alternatives --install /usr/bin/editor editor /opt/nvim-linux64/bin/nvim 60
-
-# Create a non-root user and setup sudo
-RUN useradd -m -s /bin/bash $USERNAME && \
-    echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME && \
-    chmod 0440 /etc/sudoers.d/$USERNAME
-
-# Switch to the created user
-USER $USERNAME
-
-# Install fzf
-RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
+    ln -s /opt/nvim-linux64/bin/nvim /usr/bin/nvim && \
+    \
+    git clone https://github.com/nm47/dotfiles.git ~/.config && \
+    nvim --headless "+Lazy! sync" +qa && \
+    nvim --headless "+MasonUpdate" +qa && \
+    nvim --headless "+TSUpdateSync" +qa && \
+    update-alternatives --install /usr/bin/editor editor /opt/nvim-linux64/bin/nvim 60 && \
+    \
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
     ~/.fzf/install --all
 
-# Configure bash for the user
-RUN curl -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh && \
+
+# Configure bash and setup dotfiles
+RUN \
+    # Configure bash
+    curl -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh && \
     echo "set -o vi" >> ~/.bashrc && \
     echo "alias vim='nvim'" >> ~/.bashrc && \
     echo "alias grep='rg'" >> ~/.bashrc && \
@@ -56,11 +53,6 @@ RUN curl -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/co
     echo "source ~/.git-prompt.sh" >> ~/.bashrc && \
     echo "export GIT_PS1_SHOWDIRTYSTATE=1" >> ~/.bashrc && \
     echo "export PS1='\\[\\033[01;32m\\]\u@\\h:\\[\\033[01;34m\\]\W\\[\\033[0m\\]\$(__git_ps1 \"\\[\\033[0;91m\\][%s]\\[\\033[0m\\]\")\$ '" >> ~/.bashrc
-
-# Clone dotfiles and setup Neovim
-RUN git clone https://github.com/nm47/dotfiles.git ~/.config && \
-    nvim --headless "+Lazy! sync" +qa && \
-    nvim --headless "+MasonUpdate" +qa && \
-    nvim --headless "+TSUpdateSync" +qa
-
+    
 CMD ["bash"]
+

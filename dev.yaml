@@ -4,15 +4,11 @@ services:
   dev:
     build:
       context: .
-      args:
-        - USERNAME=niels
     container_name: dev
     environment:
       - DISPLAY=$DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./ws:/home/${USERNAME}/dev_ws/
-    user: "${USERNAME}:${USERNAME}"
     entrypoint: /bin/bash
     stdin_open: true
     tty: true
